@@ -1,0 +1,9 @@
+{
+	"restartable": "rs",
+	"watch": ["src/"],
+	"ext": "ts,json",
+	"ignore": ["src/**/*.spec.ts"],
+	"execMap": {
+		"ts": "node -r ts-node/register"
+	}
+}
