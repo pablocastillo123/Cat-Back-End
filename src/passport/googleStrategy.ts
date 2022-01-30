@@ -1,3 +1,5 @@
+import UserModel from './../models/user';
+import { UserInterface } from '../interfaces/user';
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const googleStrategy = () => {
@@ -9,7 +11,23 @@ const googleStrategy = () => {
 			callbackURL: '/auth/google/callback'
 		},
 		async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-			done(null, profile);
+			UserModel.findOne(
+				{ googleId: profile.id },
+				async (err: Error, doc: UserInterface) => {
+					if (err) {
+						return done(err, null);
+					}
+					if (!doc) {
+						const newUser = new UserModel({
+							googleId: profile.id,
+							username: profile.name.givenName
+						});
+						await newUser.save();
+						done(null, newUser);
+					}
+					done(null, doc);
+				}
+			);
 		}
 	);
 };

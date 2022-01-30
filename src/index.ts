@@ -1,3 +1,5 @@
+import { UserInterface } from './interfaces/user';
+import UserModel from './models/user';
 import express from 'express';
 import startMongoDb from './database';
 import dotenv from 'dotenv';
@@ -6,12 +8,17 @@ import session from 'express-session';
 import passport from 'passport';
 import googleStrategy from './passport/googleStrategy';
 import routes from './routes';
+import { StoreCatFromApi } from './Controller/CatController';
 
 dotenv.config();
 const app = express();
-
 // Conexion MongoDB
-// startMongoDb();
+startMongoDb();
+
+const timeStoreCat = 30 * 60 * 1000;
+setInterval(()=>{
+	StoreCatFromApi()
+},timeStoreCat)
 
 // Middleware
 app.use(express.json());
@@ -26,11 +33,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user: any, done) => {
-	done(null, user);
+passport.serializeUser((user: any, done: any) => {
+	return done(null, user._id);
 });
-passport.deserializeUser(async (user: any, done) => {
-	done(null, user);
+passport.deserializeUser((id: string, done: any) => {
+	UserModel.findById(id, (err: Error, doc: UserInterface) => {
+		return done(null, doc);
+	});
 });
 
 passport.use(googleStrategy());
