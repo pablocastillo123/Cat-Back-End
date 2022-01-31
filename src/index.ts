@@ -7,6 +7,7 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import googleStrategy from './passport/googleStrategy';
+import gitHubStrategy from './passport/gitHubStrategy';
 import routes from './routes';
 import { StoreCatFromApi } from './Controller/CatController';
 
@@ -16,9 +17,9 @@ const app = express();
 startMongoDb();
 
 const timeStoreCat = 30 * 60 * 1000;
-setInterval(()=>{
-	StoreCatFromApi()
-},timeStoreCat)
+setInterval(() => {
+	StoreCatFromApi();
+}, timeStoreCat);
 
 // Middleware
 app.use(express.json());
@@ -43,6 +44,7 @@ passport.deserializeUser((id: string, done: any) => {
 });
 
 passport.use(googleStrategy());
+passport.use(gitHubStrategy());
 
 app.use('/', routes);
 
