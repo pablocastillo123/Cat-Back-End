@@ -16,6 +16,7 @@ const app = express();
 // Conexion MongoDB
 startMongoDb();
 
+// Intervalo de 30min
 const timeStoreCat = 30 * 60 * 1000;
 setInterval(() => {
 	StoreCatFromApi();
@@ -31,6 +32,8 @@ app.use(
 		saveUninitialized: true
 	})
 );
+
+// Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -46,6 +49,7 @@ passport.deserializeUser((id: string, done: any) => {
 passport.use(googleStrategy());
 passport.use(gitHubStrategy());
 
+// Routes
 app.use('/', routes);
 
 const PORT = process.env.PORT;

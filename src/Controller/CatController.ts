@@ -24,8 +24,10 @@ const StoreCatFromApi = async () => {
 		.then((res) => {
 			const data = res.data;
 			if (data) {
+				// Filtrado de datos procedentes de la api
 				let newData = filterCatBreedsAndCategory(data);
 
+				// Almacenamiento de datos sin duplicidad
 				newData.forEach((e) => {
 					CatModel.findById(e._id).then((res) => {
 						if (!res) {
