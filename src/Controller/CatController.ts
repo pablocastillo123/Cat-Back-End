@@ -1,11 +1,22 @@
 import { getCat, getCategories } from './../services/ApiCat';
 import CatModel from './../models/cat';
 import { Request, Response } from 'express';
+import { ApiCatInterface, CatInterface } from './../interfaces/cat';
 
-const filterCatBreeds = (data: any) => {
-	return data.filter((e: any) => {
-		return e.breeds.length == 0 && e.categories;
+const filterCatBreedsAndCategory = (list: Array<ApiCatInterface>) => {
+	let newList: Array<CatInterface> = [];
+	list.forEach((e: any) => {
+		if (e.breeds?.length === 0 && e.categories) {
+			newList.push({
+				_id: e.id,
+				categories: e.categories[0],
+				url: e.url,
+				width: e.width,
+				height: e.height
+			});
+		}
 	});
+	return newList;
 };
 
 const StoreCatFromApi = async () => {
@@ -13,8 +24,16 @@ const StoreCatFromApi = async () => {
 		.then((res) => {
 			const data = res.data;
 			if (data) {
-				let newData = filterCatBreeds(data);
-				CatModel.insertMany(newData, { ordered: false });
+				let newData = filterCatBreedsAndCategory(data);
+
+				newData.forEach((e) => {
+					CatModel.findById(e._id).then((res) => {
+						if (!res) {
+							let doc = new CatModel(e);
+							doc.save();
+						}
+					});
+				});
 			}
 		})
 		.catch((error) => {
@@ -35,23 +54,7 @@ const getCatFromMongoDb = async (req: Request, res: Response) => {
 
 const getCatByCategory = async (req: Request, res: Response) => {
 	try {
-		let result = await Promise.all([
-			getCategories(),
-			CatModel.aggregate([
-				{
-					$project: {
-						category: {
-							$arrayElemAt: ['$categories', 0]
-						},
-						url: 1,
-						width: 1,
-						height: 1,
-						id: 1,
-						_id: 1
-					}
-				}
-			])
-		]);
+		let result = await Promise.all([getCategories(), CatModel.find()]);
 
 		let data = {
 			category: result[0].data,

@@ -23,7 +23,7 @@ setInterval(() => {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: process.env.URL_CLIENT }));
 app.use(
 	session({
 		secret: 'catserver',
